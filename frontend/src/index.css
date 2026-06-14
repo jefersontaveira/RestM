@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  /* Nossa paleta Dourada principal */
+  --color-gold-400: #FBBF24;
+  --color-gold-500: #F59E0B;
+  --color-gold-600: #D97706;
+
+  /* Fundo escuro para o tema Dark */
+  --color-dark-bg: #121212;
+  --color-dark-card: #1E1E1E;
+  --color-dark-border: #2D2D2D;
+}
+
+body {
+  @apply bg-dark-bg text-white antialiased;
+}
