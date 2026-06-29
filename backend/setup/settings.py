@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     # Bibliotecas
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'cloudinary_storage',
     'cloudinary',

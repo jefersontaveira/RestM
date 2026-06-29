@@ -93,7 +93,9 @@ export default function Historico() {
                 <div key={pedido.id} className="bg-dark-card border border-dark-border rounded-xl p-5 flex flex-col hover:border-gray-500 transition-colors">
                   <div className="flex justify-between items-start mb-4 border-b border-dark-border pb-3">
                     <div>
-                      <h3 className="text-lg font-bold text-white">Mesa {pedido.table}</h3>
+                      <h3 className="text-lg font-bold text-white">
+                          {pedido.table_details?.identification || `Mesa #${pedido.table || 'N/A'}`}
+                        </h3>
                       <p className="text-sm text-gray-400">
                         {pedido.customer_name ? `Cliente: ${pedido.customer_name}` : 'Sem nome'}
                       </p>
