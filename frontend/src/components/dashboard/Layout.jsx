@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, LayoutGrid, Package, ReceiptText } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, LayoutGrid, Package, ReceiptText, LogOut } from 'lucide-react';
 
 export default function Layout({ children }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Nossas rotas principais do Menu
   const navLinks = [
@@ -14,6 +15,12 @@ export default function Layout({ children }) {
   ];
 
   const fecharMenu = () => setIsMenuOpen(false);
+
+  const handleLogout = () => {
+    // Remove o token do armazenamento local e redireciona para o login
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-dark-bg text-white flex flex-col md:flex-row">
@@ -58,6 +65,17 @@ export default function Layout({ children }) {
             );
           })}
         </nav>
+
+        {/* --- BOTÃO DE SAIR (Rodapé do Menu) --- */}
+        <div className="p-4 border-t border-dark-border">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-500 hover:bg-red-500/10 hover:text-red-400 transition-all"
+          >
+            <LogOut size={20} />
+            Sair do Sistema
+          </button>
+        </div>
       </div>
 
       {/* --- OVERLAY MOBILE (Fundo escuro ao abrir o menu) --- */}
