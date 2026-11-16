@@ -1,17 +1,62 @@
 @import "tailwindcss";
 
+:root {
+  --bg-app: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --border-app: #E2E8F0;
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+}
+
+html.dark {
+  --bg-app: #121212;
+  --bg-card: #1E1E1E;
+  --border-app: #2D2D2D;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+}
+
 @theme {
-  /* Nossa paleta Dourada principal */
   --color-gold-400: #FBBF24;
   --color-gold-500: #F59E0B;
   --color-gold-600: #D97706;
 
-  /* Fundo escuro para o tema Dark */
-  --color-dark-bg: #121212;
-  --color-dark-card: #1E1E1E;
-  --color-dark-border: #2D2D2D;
+  --color-dark-bg: var(--bg-app);
+  --color-dark-card: var(--bg-card);
+  --color-dark-border: var(--border-app);
 }
 
 body {
-  @apply bg-dark-bg text-white antialiased;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  @apply antialiased transition-colors duration-200;
+}
+
+/* Regras de adaptação automática para modo Light */
+html.light .text-white {
+  color: #0F172A !important;
+}
+
+html.light .text-gray-300 {
+  color: #334155 !important;
+}
+
+html.light .text-gray-400 {
+  color: #64748B !important;
+}
+
+html.light input,
+html.light select,
+html.light textarea {
+  color: #0F172A;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94A3B8;
+}
+
+/* Suporte para transições suaves */
+* {
+  border-color: var(--border-app);
 }

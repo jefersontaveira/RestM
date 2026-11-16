@@ -1,9 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft,
+  User,
+  UtensilsCrossed,
+  Trash2,
+  Receipt,
+  PlusCircle,
+  CreditCard,
+  Clock,
+  Sparkles
+} from 'lucide-react';
 import api from '../services/api';
 import ConfirmModal from '../components/mesa/ConfirmModal';
 import MenuModal from '../components/mesa/MenuModal';
-import CheckoutModal from '../components/mesa/CheckoutModal'; // <- NOVO IMPORT
+import CheckoutModal from '../components/mesa/CheckoutModal';
 
 export default function Mesa() {
   const { id } = useParams();
@@ -36,7 +47,7 @@ export default function Mesa() {
       );
 
       if (pedidoAberto && pedidoAberto.items) {
-          pedidoAberto.items.sort((a, b) => a.id - b.id);
+        pedidoAberto.items.sort((a, b) => a.id - b.id);
       }
 
       setPedido(pedidoAberto || null);
@@ -47,7 +58,7 @@ export default function Mesa() {
     }
   };
 
-const abrirAtendimento = async () => {
+  const abrirAtendimento = async () => {
     try {
       const novoPedido = {
         table: parseInt(id),
@@ -122,22 +133,23 @@ const abrirAtendimento = async () => {
     }
   };
 
-  // ---  FINALIZAR CONTA ---
+  // --- FINALIZAR CONTA ---
   const handleFinalizarConta = async (totalCalculado, metodoPagamento, trocoCalculado) => {
     try {
       await api.patch(`pedidos/${pedido.id}/`, {
         status: 'finalizado',
         total: totalCalculado.toFixed(2),
         change: trocoCalculado.toFixed(2),
+        payment_method: metodoPagamento,
         closed_at: new Date().toISOString()
       });
 
-      // 2. Liberta a mesa mudando o status
+      // Libera a mesa mudando o status
       await api.patch(`mesas/${id}/`, {
         status: 'livre'
       });
 
-      // 3. Retorna a recepcionista para o mapa de mesas
+      // Retorna para o mapa de mesas
       navigate('/');
     } catch (error) {
       console.error("Erro ao finalizar conta:", error);
@@ -145,104 +157,206 @@ const abrirAtendimento = async () => {
     }
   };
 
-  if (loading) return <div className="text-center text-gold-500 mt-20 font-bold">Carregando...</div>;
+  if (loading) {
+    return <div className="text-center text-gold-500 mt-20 font-bold text-lg animate-pulse">Carregando dados da mesa...</div>;
+  }
+
+  // Cálculo do total atual do pedido
+  const totalAtual = pedido?.items?.reduce((acc, item) => {
+    return acc + (item.quantity * parseFloat(item.unit_price || 0));
+  }, 0) || 0;
 
   return (
-    <div className="min-h-screen p-4 md:p-8 flex flex-col relative">
-      <button onClick={() => navigate('/')} className="text-gray-400 hover:text-gold-500 mb-6 flex items-center gap-2 self-start transition-colors">
-        <span>←</span> Voltar para o mapa
-      </button>
+    <div className="w-full max-w-5xl mx-auto p-4 md:p-8 flex flex-col">
+      {/* Botão Superior de Retorno */}
+      <div className="mb-6">
+        <button
+          onClick={() => navigate('/')}
+          className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-gold-500 bg-dark-card border border-dark-border hover:border-gold-500/40 px-3.5 py-2 rounded-xl transition-all shadow-sm"
+        >
+          <ArrowLeft size={16} />
+          <span>Voltar ao Mapa de Mesas</span>
+        </button>
+      </div>
 
-      <header className="mb-8 border-b border-dark-border pb-4">
-        <h1 className="text-3xl font-bold text-white">{mesa?.identification}</h1>
-        <p className="text-gray-400 mt-1">
-          Status: <span className={mesa?.status === 'ocupada' ? 'text-gold-500 font-bold' : 'text-green-500 font-bold'}>
-            {mesa?.status.toUpperCase()}
+      {/* Cabeçalho da Mesa */}
+      <header className="mb-6 border-b border-dark-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-500 font-black text-xl shadow-sm">
+            {mesa?.identification?.replace(/\D/g, '') || '#'}
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              {mesa?.identification}
+            </h1>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Identificador Operacional do Estabelecimento
+            </p>
+          </div>
+        </div>
+
+        {/* Badge de Status */}
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold uppercase tracking-wider text-xs ${
+              mesa?.status === 'ocupada'
+                ? 'bg-gold-500/15 text-gold-500 border border-gold-500/30'
+                : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                mesa?.status === 'ocupada' ? 'bg-gold-500 animate-pulse' : 'bg-emerald-500'
+              }`}
+            />
+            Mesa {mesa?.status?.toUpperCase()}
           </span>
-        </p>
+        </div>
       </header>
 
+      {/* --- SE A MESA ESTIVER LIVRE: CARD DELIMITADO E CENTRALIZADO --- */}
       {!pedido ? (
-        <div className="bg-dark-card border border-dark-border rounded-xl p-8 flex flex-col items-center justify-center flex-1">
-          <p className="text-gray-400 mb-6">Esta mesa está livre no momento.</p>
-          <div className="w-full max-w-xs mb-6">
-            <label className="block text-gray-400 text-sm font-bold mb-2 uppercase tracking-wider">
-              Nome do Cliente (Opcional)
-            </label>
-            <input
-              type="text"
-              value={nomeCliente}
-              onChange={(e) => setNomeCliente(e.target.value)}
-              placeholder="Ex: João Silva"
-              className="w-full bg-dark-bg border border-dark-border rounded-lg p-3 text-white focus:outline-none focus:border-gold-500 transition-colors"
-            />
+        <div className="w-full max-w-lg mx-auto my-6 bg-dark-card border border-dark-border rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center text-center animate-fade-in">
+          <div className="w-16 h-16 rounded-2xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-500 mb-4 shadow-sm">
+            <UtensilsCrossed size={32} />
           </div>
-          <button onClick={abrirAtendimento} className="bg-gold-500 hover:bg-gold-600 text-black font-bold py-4 px-8 rounded-xl w-full max-w-xs transition-colors shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-            Abrir Atendimento
+
+          <h2 className="text-2xl font-black text-white tracking-tight mb-1">
+            Iniciar Atendimento
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-400 mb-6 max-w-sm">
+            A <strong>{mesa?.identification}</strong> está livre. Informe o nome do cliente ou comanda para ocupar a mesa e começar a lançar pedidos.
+          </p>
+
+          <div className="w-full text-left mb-6">
+            <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
+              Nome do Cliente / Comanda (Opcional)
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-500">
+                <User size={18} />
+              </div>
+              <input
+                type="text"
+                value={nomeCliente}
+                onChange={(e) => setNomeCliente(e.target.value)}
+                placeholder="Ex: João Silva ou Família Oliveira"
+                className="w-full bg-dark-bg border border-dark-border rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-gold-500 transition-colors text-sm font-medium"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={abrirAtendimento}
+            className="w-full bg-gold-500 hover:bg-gold-600 text-black font-extrabold py-3.5 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(245,158,11,0.25)] flex items-center justify-center gap-2 text-sm active:scale-95"
+          >
+            <span>Iniciar Atendimento & Ocupar Mesa</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/')}
+            className="w-full mt-3 py-2 text-gray-400 hover:text-white font-bold text-xs transition-colors"
+          >
+            Cancelar e Voltar ao Mapa
           </button>
         </div>
       ) : (
-        <div className="bg-dark-card border border-dark-border rounded-xl p-4 md:p-6 flex-1 flex flex-col">
-          <div className="flex justify-between items-center mb-6">
+        /* --- SE A MESA ESTIVER OCUPADA: GERENCIADOR DE CONSUMO DELIMITADO --- */
+        <div className="w-full bg-dark-card border border-dark-border rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col animate-fade-in">
+          {/* Barra Superior do Pedido Ativo */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-dark-border">
             <div>
-              <h2 className="text-xl text-gold-400 font-bold">Consumo Atual</h2>
+              <div className="flex items-center gap-2">
+                <Receipt size={20} className="text-gold-500" />
+                <h2 className="text-lg sm:text-xl font-bold text-white">Comanda em Aberto</h2>
+                <span className="text-xs font-mono font-bold bg-zinc-800 text-gold-400 px-2.5 py-0.5 rounded-full border border-zinc-700">
+                  Pedido #{pedido.id}
+                </span>
+              </div>
               {pedido.customer_name && (
-                <p className="text-sm text-gray-400 mt-1">Cliente: <span className="text-white font-semibold">{pedido.customer_name}</span></p>
+                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1.5">
+                  <User size={14} className="text-gray-500" />
+                  Cliente: <span className="text-white font-bold">{pedido.customer_name}</span>
+                </p>
               )}
             </div>
-            <span className="text-sm text-gray-500">Pedido #{pedido.id}</span>
+
+            {/* Total Parcial em Destaque */}
+            <div className="flex items-center gap-3 bg-dark-bg border border-dark-border px-4 py-2 rounded-xl self-start sm:self-auto">
+              <span className="text-xs uppercase font-bold text-gray-400">Total Parcial:</span>
+              <span className="text-xl font-black text-gold-500 font-mono">
+                R$ {totalAtual.toFixed(2).replace('.', ',')}
+              </span>
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto mb-4">
+          {/* Lista de Itens Lançados */}
+          <div className="flex-1 overflow-y-auto mb-6 max-h-[45vh] pr-1">
             {pedido.items && pedido.items.length > 0 ? (
               <ul className="divide-y divide-dark-border">
                 {pedido.items.map((item, index) => (
-                  <li key={index} className="py-4 flex justify-between items-center gap-2">
-                    <div className="flex-1">
-                      <span className="text-white font-bold block">{item.quantity}x {item.item_details?.name}</span>
-                      <span className="text-gray-500 text-sm block">Unidade: R$ {item.unit_price}</span>
+                  <li key={index} className="py-3.5 flex justify-between items-center gap-3 group hover:bg-dark-bg/40 px-2 rounded-xl transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-gold-500 text-sm bg-gold-500/10 px-2 py-0.5 rounded border border-gold-500/20 shrink-0">
+                          {item.quantity}x
+                        </span>
+                        <span className="text-white font-bold text-sm truncate">
+                          {item.item_details?.name || item.saved_item_name || 'Item'}
+                        </span>
+                      </div>
+                      <span className="text-gray-500 text-xs block mt-0.5 font-mono">
+                        R$ {parseFloat(item.unit_price).toFixed(2).replace('.', ',')} cada
+                      </span>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <span className="text-gold-500 font-bold text-lg whitespace-nowrap">
-                        R$ {(item.quantity * parseFloat(item.unit_price)).toFixed(2)}
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-white font-extrabold text-sm sm:text-base font-mono">
+                        R$ {(item.quantity * parseFloat(item.unit_price)).toFixed(2).replace('.', ',')}
                       </span>
 
                       <button
                         onClick={() => setItemParaRemover(item.id)}
-                        className="text-gray-600 hover:text-red-500 p-2 rounded-lg transition-colors flex items-center justify-center"
-                        title="Remover item"
+                        className="text-gray-500 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                        title="Remover item do pedido"
                       >
-                        <span className="text-xl font-bold leading-none">✕</span>
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </li>
                 ))}
               </ul>
             ) : (
-              <div className="text-center text-gray-500 py-10">Nenhum item lançado ainda.</div>
+              <div className="text-center py-12 text-gray-500 border border-dashed border-dark-border rounded-2xl">
+                <UtensilsCrossed size={36} className="mx-auto mb-2 opacity-30 text-gold-500" />
+                <p className="font-semibold text-sm">Nenhum item lançado nesta mesa ainda.</p>
+                <p className="text-xs text-gray-600 mt-1">Clique no botão abaixo para adicionar itens do cardápio.</p>
+              </div>
             )}
           </div>
 
-          <div className="flex flex-col gap-3 mt-auto pt-4 border-t border-dark-border">
+          {/* Botões de Ação da Mesa */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-dark-border">
             <button
               onClick={abrirCardapio}
-              className="w-full bg-dark-bg border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-black font-bold py-4 px-4 rounded-xl transition-all"
+              className="flex items-center justify-center gap-2 w-full bg-gold-500 hover:bg-gold-600 text-black font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] text-sm active:scale-95"
             >
-              + Adicionar Item
+              <PlusCircle size={18} />
+              <span>+ Adicionar Item do Cardápio</span>
             </button>
-            {/* NOVO: Ação do botão Finalizar Conta */}
+
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className="w-full bg-red-900/20 border border-red-500/50 text-red-400 hover:bg-red-600 hover:text-white font-bold py-4 px-4 rounded-xl transition-all"
+              className="flex items-center justify-center gap-2 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] text-sm active:scale-95"
             >
-              Finalizar Conta
+              <CreditCard size={18} />
+              <span>Finalizar Conta & Fechar Mesa</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* COMPONENTES EXTRAÍDOS AQUI */}
+      {/* --- MODAIS DE SUPORTE --- */}
       <MenuModal
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
@@ -259,7 +373,6 @@ const abrirAtendimento = async () => {
         message="Deseja realmente excluir este item do pedido?"
       />
 
-      {/* NOVO MODAL DE CHECKOUT */}
       <CheckoutModal
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}

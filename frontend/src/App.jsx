@@ -1,10 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/dashboard/Layout';
 import Dashboard from './pages/Dashboard';
 import Mesa from './pages/Mesa';
 import Historico from './pages/Historico';
-import Login from './pages/Login';
 import Gestao from './pages/Gestao';
+import Relatorios from './pages/Relatorios';
+import Configuracoes from './pages/Configuracoes';
+import CardapioPublico from './pages/CardapioPublico';
+import Login from './pages/Login';
 import api from './services/api';
 
 // 🛡️ Componente para interceptar e bloquear acessos de usuários deslogados
@@ -12,11 +16,10 @@ function RotaProtegida({ children }) {
   const token = localStorage.getItem('@RestM:token');
 
   if (!token) {
-    // Se não tiver token, joga o funcionário de volta para o Login
     return <Navigate to="/login" replace />;
   }
 
-  // Garante que o Axios continue usando o token armazenado no cabeçalho das requisições
+  // Mantém o cabeçalho Authorization sincronizado
   api.defaults.headers.common['Authorization'] = `Token ${token}`;
 
   return children;
@@ -24,37 +27,54 @@ function RotaProtegida({ children }) {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* 🚪 Rota Pública: Login */}
-        <Route path="/login" element={<Login />} />
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* 🚪 Rotas Públicas */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/cardapio/:slug" element={<CardapioPublico />} />
+          <Route path="/cardapio/t/:slug" element={<CardapioPublico />} />
+          <Route path="/cardapio" element={<CardapioPublico />} />
 
-        {/* 🔐 Telas que possuem o Menu de Navegação (Protegidas) */}
-        <Route path="/" element={
-          <RotaProtegida>
-            <Layout><Dashboard /></Layout>
-          </RotaProtegida>
-        } />
-        <Route path="/historico" element={
-          <RotaProtegida>
-            <Layout><Historico /></Layout>
-          </RotaProtegida>
-        } />
-        <Route path="/gestao" element={
-          <RotaProtegida>
-            <Layout>
-              <Gestao />
-            </Layout>
-          </RotaProtegida>
-        } />
+          {/* 🔐 Telas Protegidas com Menu de Navegação */}
+          <Route path="/" element={
+            <RotaProtegida>
+              <Layout><Dashboard /></Layout>
+            </RotaProtegida>
+          } />
+          <Route path="/gestao" element={
+            <RotaProtegida>
+              <Layout><Gestao /></Layout>
+            </RotaProtegida>
+          } />
+          <Route path="/historico" element={
+            <RotaProtegida>
+              <Layout><Historico /></Layout>
+            </RotaProtegida>
+          } />
+          <Route path="/relatorios" element={
+            <RotaProtegida>
+              <Layout><Relatorios /></Layout>
+            </RotaProtegida>
+          } />
+          <Route path="/configuracoes" element={
+            <RotaProtegida>
+              <Layout><Configuracoes /></Layout>
+            </RotaProtegida>
+          } />
 
-        {/* 🔐 Rota Privada Focada para Atendimento de Mesas */}
-        <Route path="/mesa/:id" element={<RotaProtegida><Mesa /></RotaProtegida>} />
+          {/* 🔐 Rota Privada para Atendimento de Mesas (Integrada ao Menu de Navegação) */}
+          <Route path="/mesa/:id" element={
+            <RotaProtegida>
+              <Layout><Mesa /></Layout>
+            </RotaProtegida>
+          } />
 
-        {/* Rota de Fallback: Se digitar qualquer endereço errado, joga para o Dashboard */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Rota de Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
