@@ -310,10 +310,10 @@ export default function Layout({ children }) {
         />
       )}
 
-      {/* --- ÁREA DE CONTEÚDO PRINCIPAL (Margem ajustada dinamicamente: ml-64 aberto, ml-20 colapsado) --- */}
+      {/* --- ÁREA DE CONTEÚDO PRINCIPAL (Padding ajustado dinamicamente: pl-64 aberto, pl-20 colapsado sem estourar 100% da viewport) --- */}
       <div className={`
         flex-1 flex flex-col min-h-screen overflow-x-hidden w-full transition-all duration-300 ease-in-out
-        ${isMenuOpen ? 'md:ml-64' : 'md:ml-20'}
+        ${isMenuOpen ? 'md:pl-64' : 'md:pl-20'}
       `}>
         {/* --- MENU SUPERIOR DESKTOP (Sem botão hambúrguer e sem X - apenas identificação e tema) --- */}
         <header className="hidden md:flex sticky top-0 z-30 w-full bg-dark-card/95 backdrop-blur-md border-b border-dark-border px-4 md:px-8 py-3 items-center justify-between shadow-sm transition-colors">

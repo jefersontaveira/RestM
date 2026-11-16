@@ -152,13 +152,13 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* --- GRID DE MESAS OPERACIONAIS --- */}
+      {/* --- GRID DE MESAS OPERACIONAIS (100% RESPONSIVO E SEM CORTES) --- */}
       {loading ? (
         <div className="text-center py-20 text-gold-500 font-bold animate-pulse">
           Carregando salão e mesas...
         </div>
       ) : mesasFiltradas.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 pb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pb-12 w-full">
           {mesasFiltradas.map(table => {
             const isOcupada = (table.status || '').toLowerCase() === 'ocupada';
 

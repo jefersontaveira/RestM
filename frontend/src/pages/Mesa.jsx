@@ -167,19 +167,19 @@ export default function Mesa() {
   }, 0) || 0;
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-4 md:p-8 flex flex-col">
+    <div className="w-full p-4 sm:p-6 md:p-8 flex flex-col flex-1">
       {/* Botão Superior de Retorno */}
       <div className="mb-6">
         <button
           onClick={() => navigate('/')}
-          className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-gold-500 bg-dark-card border border-dark-border hover:border-gold-500/40 px-3.5 py-2 rounded-xl transition-all shadow-sm"
+          className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-gold-500 bg-dark-card border border-dark-border hover:border-gold-500/40 px-3.5 py-2 rounded-xl transition-all shadow-sm cursor-pointer"
         >
           <ArrowLeft size={16} />
           <span>Voltar ao Mapa de Mesas</span>
         </button>
       </div>
 
-      {/* Cabeçalho da Mesa */}
+      {/* Cabeçalho da Mesa (100% largura útil) */}
       <header className="mb-6 border-b border-dark-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-500 font-black text-xl shadow-sm">
@@ -198,7 +198,7 @@ export default function Mesa() {
         {/* Badge de Status */}
         <div className="flex items-center gap-2">
           <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold uppercase tracking-wider text-xs ${
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider text-xs ${
               mesa?.status === 'ocupada'
                 ? 'bg-gold-500/15 text-gold-500 border border-gold-500/30'
                 : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
@@ -214,54 +214,58 @@ export default function Mesa() {
         </div>
       </header>
 
-      {/* --- SE A MESA ESTIVER LIVRE: CARD DELIMITADO E CENTRALIZADO --- */}
+      {/* --- SE A MESA ESTIVER LIVRE: PREENCHE 100% DA TELA DE FORMA RESPONSIVA (ANEXO 1) --- */}
       {!pedido ? (
-        <div className="w-full max-w-lg mx-auto my-6 bg-dark-card border border-dark-border rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center text-center animate-fade-in">
-          <div className="w-16 h-16 rounded-2xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-500 mb-4 shadow-sm">
-            <UtensilsCrossed size={32} />
+        <div className="w-full bg-dark-card border border-dark-border rounded-3xl p-6 sm:p-10 md:p-14 shadow-xl flex flex-col items-center justify-center text-center animate-fade-in my-auto">
+          <div className="w-20 h-20 rounded-3xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-500 mb-5 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+            <UtensilsCrossed size={38} />
           </div>
 
-          <h2 className="text-2xl font-black text-white tracking-tight mb-1">
-            Iniciar Atendimento
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2">
+            Iniciar Atendimento • {mesa?.identification}
           </h2>
-          <p className="text-xs sm:text-sm text-gray-400 mb-6 max-w-sm">
-            A <strong>{mesa?.identification}</strong> está livre. Informe o nome do cliente ou comanda para ocupar a mesa e começar a lançar pedidos.
+          <p className="text-xs sm:text-sm md:text-base text-gray-400 mb-8 max-w-lg leading-relaxed">
+            Esta mesa está livre no momento. Informe o nome do cliente ou comanda para ocupar a mesa e começar a lançar pedidos.
           </p>
 
-          <div className="w-full text-left mb-6">
-            <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
-              Nome do Cliente / Comanda (Opcional)
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-500">
-                <User size={18} />
+          <div className="w-full max-w-lg mx-auto space-y-4">
+            <div className="text-left">
+              <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
+                Nome do Cliente / Comanda (Opcional)
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500">
+                  <User size={18} />
+                </div>
+                <input
+                  type="text"
+                  value={nomeCliente}
+                  onChange={(e) => setNomeCliente(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') abrirAtendimento(); }}
+                  placeholder="Ex: João Silva ou Família Oliveira"
+                  className="w-full bg-dark-bg border border-dark-border rounded-2xl py-3.5 pl-11 pr-4 text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors text-sm font-medium"
+                />
               </div>
-              <input
-                type="text"
-                value={nomeCliente}
-                onChange={(e) => setNomeCliente(e.target.value)}
-                placeholder="Ex: João Silva ou Família Oliveira"
-                className="w-full bg-dark-bg border border-dark-border rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-gold-500 transition-colors text-sm font-medium"
-              />
             </div>
+
+            <button
+              onClick={abrirAtendimento}
+              className="w-full bg-gold-500 hover:bg-gold-600 text-black font-extrabold py-4 px-6 rounded-2xl transition-all shadow-[0_0_20px_rgba(245,158,11,0.25)] flex items-center justify-center gap-2 text-sm sm:text-base active:scale-95 cursor-pointer"
+            >
+              <Sparkles size={18} />
+              <span>Iniciar Atendimento & Ocupar Mesa</span>
+            </button>
+
+            <button
+              onClick={() => navigate('/')}
+              className="w-full py-2.5 text-gray-400 hover:text-white font-bold text-xs transition-colors cursor-pointer"
+            >
+              Cancelar e Voltar ao Mapa de Mesas
+            </button>
           </div>
-
-          <button
-            onClick={abrirAtendimento}
-            className="w-full bg-gold-500 hover:bg-gold-600 text-black font-extrabold py-3.5 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(245,158,11,0.25)] flex items-center justify-center gap-2 text-sm active:scale-95"
-          >
-            <span>Iniciar Atendimento & Ocupar Mesa</span>
-          </button>
-
-          <button
-            onClick={() => navigate('/')}
-            className="w-full mt-3 py-2 text-gray-400 hover:text-white font-bold text-xs transition-colors"
-          >
-            Cancelar e Voltar ao Mapa
-          </button>
         </div>
       ) : isMenuOpen ? (
-        /* --- MODO ADICIONAR ITENS: RENDERIZADO DENTRO DA TELA DE MESAS (SEM COBRIR A TELA) --- */
+        /* --- MODO ADICIONAR ITENS: 100% DA LARGURA DENTRO DO PAINEL DE MESAS (ANEXO 3) --- */
         <MenuModal
           isOpen={isMenuOpen}
           onClose={() => setIsMenuOpen(false)}
@@ -271,95 +275,97 @@ export default function Mesa() {
           mesaIdentificacao={mesa?.identification}
         />
       ) : (
-        /* --- SE A MESA ESTIVER OCUPADA: GERENCIADOR DE CONSUMO DELIMITADO --- */
-        <div className="w-full bg-dark-card border border-dark-border rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col animate-fade-in">
+        /* --- SE A MESA ESTIVER OCUPADA: PREENCHE 100% DA TELA DE FORMA RESPONSIVA (ANEXO 2) --- */
+        <div className="w-full bg-dark-card border border-dark-border rounded-3xl p-5 sm:p-7 md:p-8 shadow-xl flex flex-col flex-1 animate-fade-in">
           {/* Barra Superior do Pedido Ativo */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-dark-border">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 mb-5 border-b border-dark-border">
             <div>
-              <div className="flex items-center gap-2">
-                <Receipt size={20} className="text-gold-500" />
-                <h2 className="text-lg sm:text-xl font-bold text-white">Comanda em Aberto</h2>
-                <span className="text-xs font-mono font-bold bg-zinc-800 text-gold-400 px-2.5 py-0.5 rounded-full border border-zinc-700">
+              <div className="flex items-center gap-2.5">
+                <Receipt size={22} className="text-gold-500" />
+                <h2 className="text-xl sm:text-2xl font-black text-white">Comanda em Aberto</h2>
+                <span className="text-xs font-mono font-bold bg-zinc-800 text-gold-400 px-3 py-1 rounded-full border border-zinc-700">
                   Pedido #{pedido.id}
                 </span>
               </div>
               {pedido.customer_name && (
-                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1.5">
-                  <User size={14} className="text-gray-500" />
+                <p className="text-xs sm:text-sm text-gray-400 mt-1.5 flex items-center gap-1.5">
+                  <User size={15} className="text-gray-500" />
                   Cliente: <span className="text-white font-bold">{pedido.customer_name}</span>
                 </p>
               )}
             </div>
 
             {/* Total Parcial em Destaque */}
-            <div className="flex items-center gap-3 bg-dark-bg border border-dark-border px-4 py-2 rounded-xl self-start sm:self-auto">
-              <span className="text-xs uppercase font-bold text-gray-400">Total Parcial:</span>
-              <span className="text-xl font-black text-gold-500 font-mono">
+            <div className="flex items-center gap-3 bg-dark-bg border border-dark-border px-5 py-2.5 rounded-2xl self-start sm:self-auto shadow-inner">
+              <span className="text-xs uppercase font-extrabold text-gray-400">Total Parcial:</span>
+              <span className="text-2xl sm:text-3xl font-black text-gold-500 font-mono">
                 R$ {totalAtual.toFixed(2).replace('.', ',')}
               </span>
             </div>
           </div>
 
-          {/* Lista de Itens Lançados */}
-          <div className="flex-1 overflow-y-auto mb-6 max-h-[45vh] pr-1">
+          {/* Lista de Itens Lançados (Ocupando toda a largura útil) */}
+          <div className="flex-1 overflow-y-auto mb-6 min-h-[220px] max-h-[50vh] pr-1">
             {pedido.items && pedido.items.length > 0 ? (
-              <ul className="divide-y divide-dark-border">
+              <ul className="divide-y divide-dark-border/70">
                 {pedido.items.map((item, index) => (
-                  <li key={index} className="py-3.5 flex justify-between items-center gap-3 group hover:bg-dark-bg/40 px-2 rounded-xl transition-colors">
+                  <li key={index} className="py-3.5 sm:py-4 flex justify-between items-center gap-4 group hover:bg-dark-bg/50 px-3 rounded-2xl transition-colors">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-gold-500 text-sm bg-gold-500/10 px-2 py-0.5 rounded border border-gold-500/20 shrink-0">
+                      <div className="flex items-center gap-2.5">
+                        <span className="font-mono font-black text-gold-500 text-sm bg-gold-500/10 px-2.5 py-1 rounded-lg border border-gold-500/20 shrink-0">
                           {item.quantity}x
                         </span>
-                        <span className="text-white font-bold text-sm truncate">
+                        <span className="text-white font-bold text-sm sm:text-base truncate">
                           {item.item_details?.name || item.saved_item_name || 'Item'}
                         </span>
                       </div>
-                      <span className="text-gray-500 text-xs block mt-0.5 font-mono">
+                      <span className="text-gray-500 text-xs block mt-1 font-mono pl-1">
                         R$ {parseFloat(item.unit_price).toFixed(2).replace('.', ',')} cada
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-white font-extrabold text-sm sm:text-base font-mono">
+                    <div className="flex items-center gap-4 shrink-0">
+                      <span className="text-white font-black text-base sm:text-lg font-mono">
                         R$ {(item.quantity * parseFloat(item.unit_price)).toFixed(2).replace('.', ',')}
                       </span>
 
                       <button
                         onClick={() => setItemParaRemover(item.id)}
-                        className="text-gray-500 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                        className="text-gray-500 hover:text-red-400 p-2 rounded-xl hover:bg-red-500/10 transition-colors cursor-pointer"
                         title="Remover item do pedido"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </li>
                 ))}
               </ul>
             ) : (
-              <div className="text-center py-12 text-gray-500 border border-dashed border-dark-border rounded-2xl">
-                <UtensilsCrossed size={36} className="mx-auto mb-2 opacity-30 text-gold-500" />
-                <p className="font-semibold text-sm">Nenhum item lançado nesta mesa ainda.</p>
-                <p className="text-xs text-gray-600 mt-1">Clique no botão abaixo para adicionar itens do cardápio.</p>
+              <div className="text-center py-16 text-gray-500 border-2 border-dashed border-dark-border rounded-3xl">
+                <UtensilsCrossed size={40} className="mx-auto mb-3 opacity-30 text-gold-500" />
+                <p className="font-bold text-base text-gray-300">Nenhum item lançado nesta mesa ainda.</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-sm mx-auto">
+                  Clique no botão abaixo para escolher e adicionar produtos do cardápio à comanda.
+                </p>
               </div>
             )}
           </div>
 
           {/* Botões de Ação da Mesa */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-dark-border">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4 border-t border-dark-border">
             <button
               onClick={abrirCardapio}
-              className="flex items-center justify-center gap-2 w-full bg-gold-500 hover:bg-gold-600 text-black font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] text-sm active:scale-95 cursor-pointer"
+              className="flex items-center justify-center gap-2.5 w-full bg-gold-500 hover:bg-gold-600 text-black font-extrabold py-4 px-6 rounded-2xl transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] text-sm sm:text-base active:scale-95 cursor-pointer"
             >
-              <PlusCircle size={18} />
+              <PlusCircle size={20} />
               <span>+ Adicionar Item do Cardápio</span>
             </button>
 
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className="flex items-center justify-center gap-2 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] text-sm active:scale-95 cursor-pointer"
+              className="flex items-center justify-center gap-2.5 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-4 px-6 rounded-2xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] text-sm sm:text-base active:scale-95 cursor-pointer"
             >
-              <CreditCard size={18} />
+              <CreditCard size={20} />
               <span>Finalizar Conta & Fechar Mesa</span>
             </button>
           </div>

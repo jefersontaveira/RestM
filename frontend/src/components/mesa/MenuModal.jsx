@@ -45,7 +45,7 @@ export default function MenuModal({ isOpen, onClose, categorias, itens, onLancar
   });
 
   return (
-    <div className="w-full bg-dark-card border border-dark-border rounded-3xl p-5 sm:p-7 shadow-xl flex flex-col animate-fade-in">
+    <div className="w-full bg-dark-card border border-dark-border rounded-3xl p-5 sm:p-7 md:p-8 shadow-xl flex flex-col flex-1 animate-fade-in">
       {/* Cabeçalho do Cardápio com Botão Voltar para a Comanda */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-dark-border">
         <div className="flex items-center gap-3">
@@ -107,8 +107,8 @@ export default function MenuModal({ isOpen, onClose, categorias, itens, onLancar
         </div>
       )}
 
-      {/* Grid de Itens do Cardápio com Stepper Touch */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 max-h-[50vh] overflow-y-auto pr-1">
+      {/* Grid de Itens do Cardápio com Stepper Touch (100% Responsivo e Preenche a Tela) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 mb-6 max-h-[58vh] overflow-y-auto pr-1">
         {itensExibidos.length > 0 ? (
           itensExibidos.map(item => {
             const qtd = quantidades[item.id] || 0;
