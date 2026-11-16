@@ -70,9 +70,21 @@ export default function Layout({ children }) {
   const abrirMenu = () => setIsMenuOpen(true);
   const toggleMenu = () => setIsMenuOpen(prev => !prev);
 
-  // Fecha o menu automaticamente apenas em dispositivos móveis ao navegar
+  // Ação ao clicar no logo RM
+  const handleLogoClick = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      // Celular: fecha a gaveta e vai para mesas
+      fecharMenu();
+      navigate('/');
+    } else {
+      // Desktop: recolhe/expande o menu lateral mantendo os ícones alinhados
+      toggleMenu();
+    }
+  };
+
+  // Fecha o menu automaticamente apenas em celulares ao clicar nos links de navegação
   const handleNavLinkClick = () => {
-    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
       fecharMenu();
     }
   };
@@ -98,7 +110,7 @@ export default function Layout({ children }) {
         tenant={tenantInfo}
       />
 
-      {/* --- HEADER MOBILE (Celular / Tablet Pequeno < 768px) --- */}
+      {/* --- HEADER MOBILE (Exclusivo para celular < 768px - com menu hambúrguer e botão de tema) --- */}
       <div className="md:hidden flex justify-between items-center p-3.5 sm:p-4 bg-dark-card border-b border-dark-border z-30 sticky top-0">
         <button
           type="button"
@@ -138,57 +150,63 @@ export default function Layout({ children }) {
         </div>
       </div>
 
-      {/* --- MENU LATERAL (DRAWER / SIDEBAR TOTALMENTE CONTROLÁVEL) --- */}
+      {/* --- MENU LATERAL (DRAWER NO MOBILE / SIDEBAR COLAPSÁVEL NO DESKTOP) --- */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-dark-card border-r border-dark-border flex flex-col
-        transform transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none
-        ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        fixed inset-y-0 left-0 z-50 bg-dark-card border-r border-dark-border flex flex-col
+        transition-all duration-300 ease-in-out shadow-2xl md:shadow-none
+        ${isMenuOpen
+          ? 'w-64 translate-x-0'
+          : '-translate-x-full md:translate-x-0 md:w-20'
+        }
       `}>
-        {/* Cabeçalho do Menu: Logo RestM que fecha o menu e vai pra Home + Botão X */}
-        <div className="p-5 sm:p-6 border-b border-dark-border flex items-center justify-between">
+        {/* Cabeçalho do Menu: Logo RM clicável (recolhe/expande no Desktop e fecha no Mobile) */}
+        <div className={`p-4 border-b border-dark-border flex items-center ${isMenuOpen ? 'justify-between' : 'justify-center'} transition-all`}>
           <button
             type="button"
-            onClick={() => {
-              fecharMenu();
-              navigate('/');
-            }}
-            className="flex items-center gap-3 text-left focus:outline-none group cursor-pointer"
-            title="Ir para o início e fechar o menu"
+            onClick={handleLogoClick}
+            className={`flex items-center ${isMenuOpen ? 'gap-3 text-left w-full' : 'justify-center'} focus:outline-none group cursor-pointer`}
+            title={isMenuOpen ? "Clique no logo para recolher o menu" : "Clique no logo para expandir o menu"}
           >
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gold-400 to-amber-600 flex items-center justify-center text-black font-black text-lg shadow-[0_0_15px_rgba(245,158,11,0.35)] shrink-0 group-hover:scale-105 transition-transform">
               RM
             </div>
-            <div>
-              <h1 className="text-2xl font-black text-white tracking-tight leading-tight">
-                Rest<span className="text-gold-500">M</span>
-              </h1>
-              <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">
-                Painel Operacional
-              </span>
-            </div>
+            {isMenuOpen && (
+              <div className="overflow-hidden transition-all duration-200">
+                <h1 className="text-2xl font-black text-white tracking-tight leading-tight whitespace-nowrap">
+                  Rest<span className="text-gold-500">M</span>
+                </h1>
+                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block whitespace-nowrap">
+                  Painel Operacional
+                </span>
+              </div>
+            )}
           </button>
 
-          {/* Botão de Fechar Direto (funciona em Desktop e Mobile) */}
-          <button
-            type="button"
-            onClick={fecharMenu}
-            className="p-2 text-gray-400 hover:text-white rounded-xl hover:bg-dark-bg transition-colors cursor-pointer"
-            title="Fechar / Recolher Menu"
-            aria-label="Fechar menu"
-          >
-            <X size={20} />
-          </button>
+          {/* Botão X exclusivo para Celular (nunca aparece no Desktop) */}
+          {isMenuOpen && (
+            <button
+              type="button"
+              onClick={fecharMenu}
+              className="md:hidden p-2 text-gray-400 hover:text-white rounded-xl hover:bg-dark-bg transition-colors cursor-pointer shrink-0"
+              title="Fechar Menu"
+              aria-label="Fechar menu"
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
 
-        {/* Sub-faixa com nome do Restaurante / Unidade */}
-        <div className="px-6 py-2.5 bg-dark-bg/60 border-b border-dark-border/60">
-          <p className="text-xs font-bold text-gold-500 truncate" title={tenantInfo.name}>
-            {tenantInfo.name}
-          </p>
-        </div>
+        {/* Sub-faixa com nome do Restaurante (apenas quando expandido) */}
+        {isMenuOpen && (
+          <div className="px-5 py-2 bg-dark-bg/60 border-b border-dark-border/60 transition-all">
+            <p className="text-xs font-bold text-gold-500 truncate" title={tenantInfo.name}>
+              {tenantInfo.name}
+            </p>
+          </div>
+        )}
 
-        {/* Links de Navegação */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        {/* Links de Navegação (Ícones sempre visíveis e perfeitamente alinhados) */}
+        <nav className="flex-1 p-2.5 space-y-2 overflow-y-auto overflow-x-hidden">
           {navLinks.map((link) => {
             const isActive = link.path === '/'
               ? (location.pathname === '/' || location.pathname.startsWith('/mesa'))
@@ -198,119 +216,116 @@ export default function Layout({ children }) {
                 key={link.name}
                 to={link.path}
                 onClick={handleNavLinkClick}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                title={!isMenuOpen ? link.name : undefined}
+                className={`flex items-center rounded-xl font-bold text-sm transition-all duration-200 ${
+                  isMenuOpen
+                    ? 'px-4 py-3 gap-3 justify-start'
+                    : 'p-3 justify-center'
+                } ${
                   isActive
                     ? 'bg-gold-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.25)]'
                     : 'text-gray-400 hover:bg-dark-bg hover:text-white'
                 }`}
               >
-                {link.icon}
-                {link.name}
+                <div className="shrink-0 flex items-center justify-center">
+                  {link.icon}
+                </div>
+                {isMenuOpen && (
+                  <span className="whitespace-nowrap truncate">{link.name}</span>
+                )}
               </Link>
             );
           })}
 
-          {/* Atalho Especial: Abrir Cardápio Público */}
-          <div className="pt-4 mt-4 border-t border-dark-border space-y-2">
+          {/* Atalhos Especiais: Cardápio e QR Code */}
+          <div className={`pt-3 mt-3 border-t border-dark-border space-y-2 ${isMenuOpen ? '' : 'flex flex-col items-center'}`}>
+            {/* Cardápio Digital */}
             <a
               href={cardapioUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between px-4 py-2.5 rounded-xl font-bold text-xs bg-dark-bg border border-dark-border text-gold-500 hover:border-gold-500 transition-all group"
+              title={!isMenuOpen ? "Cardápio Digital" : undefined}
+              className={`flex items-center rounded-xl font-bold text-xs bg-dark-bg border border-dark-border text-gold-500 hover:border-gold-500 transition-all group ${
+                isMenuOpen
+                  ? 'justify-between px-4 py-2.5'
+                  : 'justify-center p-3 w-full'
+              }`}
             >
-              <div className="flex items-center gap-2.5">
-                <UtensilsCrossed size={16} />
-                <span>Cardápio Digital</span>
+              <div className="flex items-center gap-2.5 shrink-0 justify-center">
+                <UtensilsCrossed size={18} />
+                {isMenuOpen && <span>Cardápio Digital</span>}
               </div>
-              <ExternalLink size={14} className="opacity-70 group-hover:opacity-100" />
+              {isMenuOpen && <ExternalLink size={14} className="opacity-70 group-hover:opacity-100 shrink-0" />}
             </a>
 
-            {/* Atalho Especial: Imprimir QR Code da Mesa */}
+            {/* QR Code da Mesa */}
             <button
               type="button"
               onClick={() => {
                 setIsQrModalOpen(true);
-                if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                if (typeof window !== 'undefined' && window.innerWidth < 768) {
                   fecharMenu();
                 }
               }}
-              className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl font-bold text-xs bg-dark-bg border border-dark-border text-gray-300 hover:text-gold-500 hover:border-gold-500/50 transition-all group"
+              title={!isMenuOpen ? "QR Code da Mesa" : undefined}
+              className={`flex items-center rounded-xl font-bold text-xs bg-dark-bg border border-dark-border text-gray-300 hover:text-gold-500 hover:border-gold-500/50 transition-all group ${
+                isMenuOpen
+                  ? 'justify-between w-full px-4 py-2.5'
+                  : 'justify-center p-3 w-full'
+              }`}
             >
-              <div className="flex items-center gap-2.5">
-                <QrCode size={16} className="text-gold-500" />
-                <span>QR Code da Mesa</span>
+              <div className="flex items-center gap-2.5 shrink-0 justify-center">
+                <QrCode size={18} className="text-gold-500" />
+                {isMenuOpen && <span>QR Code da Mesa</span>}
               </div>
-              <Printer size={14} className="opacity-70 group-hover:opacity-100" />
+              {isMenuOpen && <Printer size={14} className="opacity-70 group-hover:opacity-100 shrink-0" />}
             </button>
           </div>
         </nav>
 
-        {/* --- BOTÃO DE SAIR (Rodapé Fixo do Menu) --- */}
-        <div className="p-4 border-t border-dark-border mt-auto">
+        {/* --- BOTÃO DE SAIR (Ícone alinhado quando fechado) --- */}
+        <div className="p-3 border-t border-dark-border mt-auto">
           <button
+            type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-red-500 hover:bg-red-500/10 hover:text-red-400 transition-all cursor-pointer"
+            title={!isMenuOpen ? "Sair do Sistema" : undefined}
+            className={`flex w-full items-center rounded-xl font-bold text-sm text-red-500 hover:bg-red-500/10 hover:text-red-400 transition-all cursor-pointer ${
+              isMenuOpen
+                ? 'gap-3 px-4 py-3 justify-start'
+                : 'justify-center p-3'
+            }`}
           >
-            <LogOut size={18} />
-            Sair do Sistema
+            <LogOut size={18} className="shrink-0" />
+            {isMenuOpen && <span className="whitespace-nowrap">Sair do Sistema</span>}
           </button>
         </div>
       </aside>
 
-      {/* --- OVERLAY PARA DISPOSITIVOS MÓVEIS (Fecha o menu ao clicar fora) --- */}
+      {/* --- OVERLAY EXCLUSIVO PARA CELULAR (Fecha o menu ao clicar fora) --- */}
       {isMenuOpen && (
         <div
           onClick={fecharMenu}
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm transition-opacity"
           aria-hidden="true"
         />
       )}
 
-      {/* --- ÁREA DE CONTEÚDO PRINCIPAL (Margem dinâmica ajustada suavemente) --- */}
+      {/* --- ÁREA DE CONTEÚDO PRINCIPAL (Margem ajustada dinamicamente: ml-64 aberto, ml-20 colapsado) --- */}
       <div className={`
         flex-1 flex flex-col min-h-screen overflow-x-hidden w-full transition-all duration-300 ease-in-out
-        ${isMenuOpen ? 'md:ml-64' : 'md:ml-0'}
+        ${isMenuOpen ? 'md:ml-64' : 'md:ml-20'}
       `}>
-        {/* --- MENU SUPERIOR FIXO (Desktop & Tablet >= 768px) --- */}
+        {/* --- MENU SUPERIOR DESKTOP (Sem botão hambúrguer e sem X - apenas identificação e tema) --- */}
         <header className="hidden md:flex sticky top-0 z-30 w-full bg-dark-card/95 backdrop-blur-md border-b border-dark-border px-4 md:px-8 py-3 items-center justify-between shadow-sm transition-colors">
-          {/* Esquerda: Botão de Abrir/Fechar Menu Lateral + Identificação da Tela Atual */}
-          <div className="flex items-center gap-3.5">
-            <button
-              type="button"
-              onClick={toggleMenu}
-              className="p-2 rounded-xl bg-dark-bg border border-dark-border hover:border-gold-500/60 text-gray-300 hover:text-gold-500 transition-all shadow-sm active:scale-95 cursor-pointer"
-              title={isMenuOpen ? "Fechar / Recolher menu lateral" : "Abrir / Expandir menu lateral"}
-              aria-label="Alternar menu lateral"
-            >
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-
-            {/* Logo compacto se o menu lateral estiver fechado */}
-            {!isMenuOpen && (
-              <button
-                type="button"
-                onClick={() => navigate('/')}
-                className="flex items-center gap-2 mr-2 text-left group cursor-pointer animate-fade-in"
-                title="Ir para o início (Mesas)"
-              >
-                <div className="w-8 h-8 rounded-xl bg-gold-500/15 border border-gold-500/40 flex items-center justify-center text-gold-500 font-black text-xs shadow-sm group-hover:scale-105 transition-transform">
-                  RM
-                </div>
-                <span className="text-xl font-black text-white leading-none">
-                  Rest<span className="text-gold-500">M</span>
-                </span>
-              </button>
-            )}
-
-            <div className="flex items-center gap-2.5">
-              <span className="text-base font-extrabold text-white">
-                {telaAtualNome}
-              </span>
-              <span className="text-gray-600 hidden sm:inline">•</span>
-              <span className="text-xs font-bold text-gold-500 bg-gold-500/10 px-2.5 py-0.5 rounded-full border border-gold-500/20 hidden sm:inline-block">
-                {tenantInfo.name}
-              </span>
-            </div>
+          {/* Esquerda: Identificação da Tela Atual */}
+          <div className="flex items-center gap-2.5">
+            <span className="text-base font-extrabold text-white">
+              {telaAtualNome}
+            </span>
+            <span className="text-gray-600">•</span>
+            <span className="text-xs font-bold text-gold-500 bg-gold-500/10 px-2.5 py-0.5 rounded-full border border-gold-500/20">
+              {tenantInfo.name}
+            </span>
           </div>
 
           {/* Direita: Apenas o Botão de Tema (Modo Claro / Escuro) */}
