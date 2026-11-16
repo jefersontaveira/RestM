@@ -260,6 +260,16 @@ export default function Mesa() {
             Cancelar e Voltar ao Mapa
           </button>
         </div>
+      ) : isMenuOpen ? (
+        /* --- MODO ADICIONAR ITENS: RENDERIZADO DENTRO DA TELA DE MESAS (SEM COBRIR A TELA) --- */
+        <MenuModal
+          isOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+          categorias={categorias}
+          itens={itens}
+          onLancarTudo={handleLancarTudo}
+          mesaIdentificacao={mesa?.identification}
+        />
       ) : (
         /* --- SE A MESA ESTIVER OCUPADA: GERENCIADOR DE CONSUMO DELIMITADO --- */
         <div className="w-full bg-dark-card border border-dark-border rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col animate-fade-in">
@@ -339,7 +349,7 @@ export default function Mesa() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-dark-border">
             <button
               onClick={abrirCardapio}
-              className="flex items-center justify-center gap-2 w-full bg-gold-500 hover:bg-gold-600 text-black font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] text-sm active:scale-95"
+              className="flex items-center justify-center gap-2 w-full bg-gold-500 hover:bg-gold-600 text-black font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] text-sm active:scale-95 cursor-pointer"
             >
               <PlusCircle size={18} />
               <span>+ Adicionar Item do Cardápio</span>
@@ -347,7 +357,7 @@ export default function Mesa() {
 
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className="flex items-center justify-center gap-2 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] text-sm active:scale-95"
+              className="flex items-center justify-center gap-2 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] text-sm active:scale-95 cursor-pointer"
             >
               <CreditCard size={18} />
               <span>Finalizar Conta & Fechar Mesa</span>
@@ -357,14 +367,6 @@ export default function Mesa() {
       )}
 
       {/* --- MODAIS DE SUPORTE --- */}
-      <MenuModal
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-        categorias={categorias}
-        itens={itens}
-        onLancarTudo={handleLancarTudo}
-      />
-
       <ConfirmModal
         isOpen={!!itemParaRemover}
         onClose={() => setItemParaRemover(null)}
