@@ -159,35 +159,39 @@ export default function Layout({ children }) {
           : '-translate-x-full md:translate-x-0 md:w-20'
         }
       `}>
-        {/* Cabeçalho do Menu: Logo RM clicável (recolhe/expande no Desktop e fecha no Mobile) */}
-        <div className={`p-4 border-b border-dark-border flex items-center ${isMenuOpen ? 'justify-between' : 'justify-center'} transition-all`}>
+        {/* Cabeçalho do Menu: Altura 100% fixa (h-20) para os ícones abaixo nunca teletransportarem na vertical */}
+        <div className="h-20 px-3 border-b border-dark-border flex items-center shrink-0">
           <button
             type="button"
             onClick={handleLogoClick}
-            className={`flex items-center ${isMenuOpen ? 'gap-3 text-left w-full' : 'justify-center'} focus:outline-none group cursor-pointer`}
+            className="flex items-center w-full h-12 px-2 rounded-2xl focus:outline-none group cursor-pointer overflow-hidden transition-colors hover:bg-dark-bg/60"
             title={isMenuOpen ? "Clique no logo para recolher o menu" : "Clique no logo para expandir o menu"}
           >
+            {/* Ícone Logo RM: Posição fixa de 40px (w-10), alinhado verticalmente com todos os ícones abaixo */}
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gold-400 to-amber-600 flex items-center justify-center text-black font-black text-lg shadow-[0_0_15px_rgba(245,158,11,0.35)] shrink-0 group-hover:scale-105 transition-transform">
               RM
             </div>
-            {isMenuOpen && (
-              <div className="overflow-hidden transition-all duration-200">
-                <h1 className="text-2xl font-black text-white tracking-tight leading-tight whitespace-nowrap">
-                  Rest<span className="text-gold-500">M</span>
-                </h1>
-                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block whitespace-nowrap">
-                  Painel Operacional
-                </span>
-              </div>
-            )}
+
+            {/* Texto: RestM e Nome do Restaurante (Transição suave sem empurrar o layout) */}
+            <div className={`
+              ml-3 flex flex-col text-left min-w-0 transition-all duration-300 ease-in-out
+              ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-3 pointer-events-none w-0 overflow-hidden'}
+            `}>
+              <h1 className="text-xl font-black text-white tracking-tight leading-none whitespace-nowrap">
+                Rest<span className="text-gold-500">M</span>
+              </h1>
+              <span className="text-[11px] font-bold text-gold-500 truncate max-w-[130px] mt-1 whitespace-nowrap block" title={tenantInfo.name}>
+                {tenantInfo.name}
+              </span>
+            </div>
           </button>
 
-          {/* Botão X exclusivo para Celular (nunca aparece no Desktop) */}
+          {/* Botão X exclusivo para Celular (nunca visível no Desktop) */}
           {isMenuOpen && (
             <button
               type="button"
               onClick={fecharMenu}
-              className="md:hidden p-2 text-gray-400 hover:text-white rounded-xl hover:bg-dark-bg transition-colors cursor-pointer shrink-0"
+              className="md:hidden p-2 text-gray-400 hover:text-white rounded-xl hover:bg-dark-bg transition-colors cursor-pointer shrink-0 ml-auto"
               title="Fechar Menu"
               aria-label="Fechar menu"
             >
@@ -196,17 +200,8 @@ export default function Layout({ children }) {
           )}
         </div>
 
-        {/* Sub-faixa com nome do Restaurante (apenas quando expandido) */}
-        {isMenuOpen && (
-          <div className="px-5 py-2 bg-dark-bg/60 border-b border-dark-border/60 transition-all">
-            <p className="text-xs font-bold text-gold-500 truncate" title={tenantInfo.name}>
-              {tenantInfo.name}
-            </p>
-          </div>
-        )}
-
-        {/* Links de Navegação (Ícones sempre visíveis e perfeitamente alinhados) */}
-        <nav className="flex-1 p-2.5 space-y-2 overflow-y-auto overflow-x-hidden">
+        {/* Links de Navegação: Ícones 100% ancorados no eixo X e Y (zero movimento brusco) */}
+        <nav className="flex-1 px-3 py-3 space-y-2 overflow-y-auto overflow-x-hidden">
           {navLinks.map((link) => {
             const isActive = link.path === '/'
               ? (location.pathname === '/' || location.pathname.startsWith('/mesa'))
@@ -217,45 +212,48 @@ export default function Layout({ children }) {
                 to={link.path}
                 onClick={handleNavLinkClick}
                 title={!isMenuOpen ? link.name : undefined}
-                className={`flex items-center rounded-xl font-bold text-sm transition-all duration-200 ${
-                  isMenuOpen
-                    ? 'px-4 py-3 gap-3 justify-start'
-                    : 'p-3 justify-center'
-                } ${
+                className={`flex items-center h-12 px-2 rounded-2xl font-bold text-sm transition-colors duration-200 group overflow-hidden ${
                   isActive
                     ? 'bg-gold-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.25)]'
                     : 'text-gray-400 hover:bg-dark-bg hover:text-white'
                 }`}
               >
-                <div className="shrink-0 flex items-center justify-center">
+                {/* Container do ícone com tamanho fixo (w-10 h-10) perfeitamente centrado no modo colapsado */}
+                <div className="w-10 h-10 flex items-center justify-center shrink-0">
                   {link.icon}
                 </div>
-                {isMenuOpen && (
-                  <span className="whitespace-nowrap truncate">{link.name}</span>
-                )}
+
+                {/* Texto do menu com fade e slide suaves, sem puxar ou empurrar o ícone */}
+                <span className={`
+                  ml-3 whitespace-nowrap truncate transition-all duration-300 ease-in-out
+                  ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-3 pointer-events-none w-0 overflow-hidden'}
+                `}>
+                  {link.name}
+                </span>
               </Link>
             );
           })}
 
-          {/* Atalhos Especiais: Cardápio e QR Code */}
-          <div className={`pt-3 mt-3 border-t border-dark-border space-y-2 ${isMenuOpen ? '' : 'flex flex-col items-center'}`}>
+          {/* Atalhos Especiais: Cardápio e QR Code (com ícones ancorados na mesma coluna) */}
+          <div className="pt-3 mt-3 border-t border-dark-border space-y-2">
             {/* Cardápio Digital */}
             <a
               href={cardapioUrl}
               target="_blank"
               rel="noopener noreferrer"
               title={!isMenuOpen ? "Cardápio Digital" : undefined}
-              className={`flex items-center rounded-xl font-bold text-xs bg-dark-bg border border-dark-border text-gold-500 hover:border-gold-500 transition-all group ${
-                isMenuOpen
-                  ? 'justify-between px-4 py-2.5'
-                  : 'justify-center p-3 w-full'
-              }`}
+              className="flex items-center h-11 px-2 rounded-2xl font-bold text-xs bg-dark-bg border border-dark-border text-gold-500 hover:border-gold-500 transition-colors group overflow-hidden"
             >
-              <div className="flex items-center gap-2.5 shrink-0 justify-center">
+              <div className="w-10 h-10 flex items-center justify-center shrink-0">
                 <UtensilsCrossed size={18} />
-                {isMenuOpen && <span>Cardápio Digital</span>}
               </div>
-              {isMenuOpen && <ExternalLink size={14} className="opacity-70 group-hover:opacity-100 shrink-0" />}
+              <div className={`
+                ml-3 flex items-center justify-between flex-1 min-w-0 transition-all duration-300 ease-in-out
+                ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-3 pointer-events-none w-0 overflow-hidden'}
+              `}>
+                <span className="whitespace-nowrap truncate">Cardápio Digital</span>
+                <ExternalLink size={13} className="opacity-70 group-hover:opacity-100 shrink-0 ml-2" />
+              </div>
             </a>
 
             {/* QR Code da Mesa */}
@@ -268,35 +266,39 @@ export default function Layout({ children }) {
                 }
               }}
               title={!isMenuOpen ? "QR Code da Mesa" : undefined}
-              className={`flex items-center rounded-xl font-bold text-xs bg-dark-bg border border-dark-border text-gray-300 hover:text-gold-500 hover:border-gold-500/50 transition-all group ${
-                isMenuOpen
-                  ? 'justify-between w-full px-4 py-2.5'
-                  : 'justify-center p-3 w-full'
-              }`}
+              className="flex items-center w-full h-11 px-2 rounded-2xl font-bold text-xs bg-dark-bg border border-dark-border text-gray-300 hover:text-gold-500 hover:border-gold-500/50 transition-colors group overflow-hidden cursor-pointer"
             >
-              <div className="flex items-center gap-2.5 shrink-0 justify-center">
-                <QrCode size={18} className="text-gold-500" />
-                {isMenuOpen && <span>QR Code da Mesa</span>}
+              <div className="w-10 h-10 flex items-center justify-center shrink-0 text-gold-500">
+                <QrCode size={18} />
               </div>
-              {isMenuOpen && <Printer size={14} className="opacity-70 group-hover:opacity-100 shrink-0" />}
+              <div className={`
+                ml-3 flex items-center justify-between flex-1 min-w-0 transition-all duration-300 ease-in-out
+                ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-3 pointer-events-none w-0 overflow-hidden'}
+              `}>
+                <span className="whitespace-nowrap truncate">QR Code da Mesa</span>
+                <Printer size={13} className="opacity-70 group-hover:opacity-100 shrink-0 ml-2" />
+              </div>
             </button>
           </div>
         </nav>
 
-        {/* --- BOTÃO DE SAIR (Ícone alinhado quando fechado) --- */}
+        {/* --- BOTÃO DE SAIR (Ícone alinhado permanentemente com os demais) --- */}
         <div className="p-3 border-t border-dark-border mt-auto">
           <button
             type="button"
             onClick={handleLogout}
             title={!isMenuOpen ? "Sair do Sistema" : undefined}
-            className={`flex w-full items-center rounded-xl font-bold text-sm text-red-500 hover:bg-red-500/10 hover:text-red-400 transition-all cursor-pointer ${
-              isMenuOpen
-                ? 'gap-3 px-4 py-3 justify-start'
-                : 'justify-center p-3'
-            }`}
+            className="flex w-full items-center h-12 px-2 rounded-2xl font-bold text-sm text-red-500 hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer overflow-hidden group"
           >
-            <LogOut size={18} className="shrink-0" />
-            {isMenuOpen && <span className="whitespace-nowrap">Sair do Sistema</span>}
+            <div className="w-10 h-10 flex items-center justify-center shrink-0">
+              <LogOut size={18} />
+            </div>
+            <span className={`
+              ml-3 whitespace-nowrap truncate transition-all duration-300 ease-in-out
+              ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-3 pointer-events-none w-0 overflow-hidden'}
+            `}>
+              Sair do Sistema
+            </span>
           </button>
         </div>
       </aside>
